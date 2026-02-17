@@ -1,5 +1,82 @@
-{% extends "base.html" %}
-{%block title %} Home Page {% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-  <p>This is the home page.</p>
+
+<div class="card p-4 shadow">
+    <h4>Add Todo</h4>
+
+    <form id="todoForm">
+        {% csrf_token %}
+        <input type="text" name="title" class="form-control mb-2" placeholder="Title" required>
+        <textarea name="description" class="form-control mb-2" placeholder="Description" required></textarea>
+        <button class="btn btn-primary">Add</button>
+    </form>
+</div>
+
+<div class="mt-4" id="todoList">
+    {% for todo in todos %}
+        <div class="card mt-2 p-3" id="todo-{{ todo.id }}">
+            <h5 {% if todo.completed %}class="text-decoration-line-through"{% endif %}>
+                {{ todo.title }}
+            </h5>
+            <p>{{ todo.description }}</p>
+
+            <button onclick="toggleComplete({{ todo.id }})" class="btn btn-success btn-sm">
+                Complete
+            </button>
+
+            <button onclick="openDeleteModal({{ todo.id }})" class="btn btn-danger btn-sm">
+                Delete
+            </button>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deleteModal">
+  <div class="modal-dialog">
+    <div class="modal-content p-4">
+      <h5>Confirm Delete?</h5>
+      <button id="confirmDeleteBtn" class="btn btn-danger">Yes Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let deleteId = null;
+
+document.getElementById("todoForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    fetch("{% url 'add_todo' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new FormData(this)
+    })
+    .then(res => res.json())
+    .then(data => location.reload());
+});
+
+function openDeleteModal(id){
+    deleteId = id;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+document.getElementById("confirmDeleteBtn").onclick = function(){
+    fetch(`/delete/${deleteId}/`)
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById(`todo-${deleteId}`).remove();
+        location.reload();
+    });
+};
+
+function toggleComplete(id){
+    fetch(`/toggle/${id}/`)
+    .then(res => res.json())
+    .then(data => location.reload());
+}
+</script>
+
 {% endblock %}
