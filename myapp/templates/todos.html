@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      margin: 0;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #1f1f1f;
+      color: #e0e0e0;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #3b82f6;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #2563eb;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #1f1f1f;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    a {
+      color: #3b82f6;
+      text-decoration: none;
+      margin-left: 10px;
+      font-size: 0.9em;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 500px) {
+      li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      a {
+        margin-left: 0;
+        margin-top: 5px;
+      }
+    }
+
+    footer {
+      text-align: center;
+      margin: 40px 0 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>My Todo List</h1>
+  </header>
+
+  <main>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="text" name="title" placeholder="New task" required>
+      <input type="text" name="description" placeholder="Description (optional)">
+      <button type="submit">Add Task</button>
+    </form>
+
+    <ul>
+      {% for todo in todos %}
+        <li class="{% if todo.completed %}completed{% endif %}">
+          <div>
+            <strong>{{ todo.title }}</strong>{% if todo.description %} - {{ todo.description }}{% endif %}
+          </div>
+          <div>
+            <a href="{% url 'toggle_complete' todo.id %}">Toggle</a>
+            <a href="{% url 'delete_todo' todo.id %}">Delete</a>
+          </div>
+        </li>
+      {% empty %}
+        <li>No todos yet!</li>
+      {% endfor %}
+    </ul>
+
+    <footer>
+      <a href="{% url 'logout' %}">Logout</a>
+    </footer>
+  </main>
+</body>
+</html>
